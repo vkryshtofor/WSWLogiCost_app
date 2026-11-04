@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор Перевезень</title>
+  <!-- Підключення SDK Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  function exportToPDF() {
+  // Вибираємо блок з результатами розрахунку
+  const element = document.querySelector('.result-card');
+  function exportToCSV() {
+  // Збираємо дані з полів калькулятора
+  const distance = document.getElementById('distance').value;
+  const emptyPct = document.getElementById('emptyPct').value;
+  const fuelPrice = document.getElementById('fuelPrice').value;
+  const consumption = document.getElementById('consumption').value;
+  const tolls = document.getElementById('tolls').value;
+  const fixedPerKm = document.getElementById('fixedPerKm').value;
+  const margin = document.getElementById('margin').value;
+  
+  // Збираємо результати
+  const varPerKm = document.getElementById('varPerKm').innerText;
+  const costPerKm = document.getElementById('costPerKm').innerText;
+  const ratePerKm = document.getElementById('ratePerKm').innerText;
+  const totalTripCost = document.getElementById('totalTripCost').innerText;
+
+  // Формуємо вміст CSV файлу (з підтримкою кирилиці через UTF-8 BOM)
+  let csvContent = "\uFEFF"; // BOM для коректного відображення української мови в Excel
+  csvContent += "Параметр;Значення\n";
+  csvContent += "Пробіг рейсу (км);" + distance + "\n";
+  csvContent += "Порожній пробіг (%);" + emptyPct + "%\n";
+  csvContent += "Ціна дизеля (€/л);" + fuelPrice + "\n";
+  csvContent += "Витрата пального (л/100км);" + consumption + "\n";
+  csvContent += "Платні дороги (€/км);" + tolls + "\n";
+  csvContent += "Постійні витрати (€/км);" + fixedPerKm + "\n";
+  csvContent += "Маржа (%);" + margin + "%\n";
+  csvContent += "Змінні витрати/км;" + varPerKm + "\n";
+  csvContent += "Собівартість 1 км;" + costPerKm + "\n";
+  csvContent += "Мінімальна ставка/км;" + ratePerKm + "\n";
+  csvContent += "Загальна вартість рейсу;" + totalTripCost + "\n";
+
+  // Створюємо віртуальне посилання для завантаження файлу
+  const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "calculation_report.csv");
+  document.body.appendChild(link);
+  
+  // Автоматично клікаємо по посиланню для завантаження
+  link.click();
+  document.body.removeChild(link);
+}
+  
+  const options = {
+    margin:       10,
+    filename:     'reis_calculation.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Запуск генерації та збереження PDF
+  html2pdf().from(element).set(options).save();
+}
+  // Вибираємо блок з результатами розрахунку
+  const element = document.querySelector('.result-card');
+  
+  const options = {
+    margin:       10,
+    filename:     'reis_calculation.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Запуск генерації та збереження PDF
+  html2pdf().from(element).set(options).save();
+}
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #ffffff);
+      --text-color: var(--tg-theme-text-color, #222222);
+      --hint-color: var(--tg-theme-hint-color, #999999);
+      --btn-color: var(--tg-theme-button-color, #2481cc);
+      --btn-text-color: var(--tg-theme-button-text-color, #ffffff);
+      --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    h2 { margin-top: 0; text-align: center; }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--hint-color);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: var(--secondary-bg);
+      color: var(--text-color);
+      box-sizing: border-box;
+      font-size: 15px;
+    }
+
+    .result-card {
+      background: var(--secondary-bg);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 16px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .result-row.total {
+      font-weight: bold;
+      font-size: 16px;
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+      color: var(--btn-color);
+    }
+
+    <button class="send-btn" style="background-color: #27ae60; margin-top: 8px;" onclick="exportToCSV()">📊 Експортувати в таблицю (CSV)</button>
+    <button class="send-btn" style="background-color: #e74c3c; margin-top: 8px;" onclick="exportToPDF()">📥 Завантажити звіт у PDF</button>
+    button.send-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--btn-color);
+      color: var(--btn-text-color);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🚛 Калькулятор Собівартості</h2>
+
+  <div class="form-group">
+    <label for="distance">Пробіг рейсу (км):</label>
+    <input type="number" id="distance" value="1500" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="emptyPct">Порожній пробіг (%):</label>
+    <input type="number" id="emptyPct" value="10" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="fuelPrice">Ціна дизеля (€/л):</label>
+    <input type="number" step="0.01" id="fuelPrice" value="1.40" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="consumption">Витрата пального (л/100 км):</label>
+    <input type="number" id="consumption" value="31" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="tolls">Платні дороги (€/км):</label>
+    <input type="number" step="0.01" id="tolls" value="0.19" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="fixedPerKm">Постійні витрати + зарплата (€/км):</label>
+    <input type="number" step="0.01" id="fixedPerKm" value="0.48" oninput="calculate()">
+  </div>
+
+  <div class="form-group">
+    <label for="margin">Маржа (%):</label>
+    <input type="number" id="margin" value="15" oninput="calculate()">
+  </div>
+
+  <div class="result-card">
+    <div class="result-row">
+      <span>Змінні витрати/км:</span>
+      <span id="varPerKm">0.00 €</span>
+    </div>
+    <div class="result-row">
+      <span>Собівартість 1 км (з пустим):</span>
+      <span id="costPerKm">0.00 €</span>
+    </div>
+    <div class="result-row total">
+      <span>Мінімальна ставка / км:</span>
+      <span id="ratePerKm">0.00 €</span>
+    </div>
+    <div class="result-row total">
+      <span>Загальна вартість рейсу:</span>
+      <span id="totalTripCost">0.00 €</span>
+    </div>
+  </div>
+
+  <button class="send-btn" onclick="sendResultToChat()">Надіслати результат у чат</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Розгортаємо Mini App на весь екран
+
+    function calculate() {
+      const distance = parseFloat(document.getElementById('distance').value) || 0;
+      const emptyPct = (parseFloat(document.getElementById('emptyPct').value) || 0) / 100;
+      const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
+      const consumption = parseFloat(document.getElementById('consumption').value) || 0;
+      const tolls = parseFloat(document.getElementById('tolls').value) || 0;
+      const fixedPerKm = parseFloat(document.getElementById('fixedPerKm').value) || 0;
+      const margin = (parseFloat(document.getElementById('margin').value) || 0) / 100;
+
+      // Змінні витрати: Паливо + AdBlue (приблизно 2% від пального) + дороги + ТО (0.05€)
+      const fuelCostKm = (consumption / 100) * fuelPrice;
+      const varCostKm = fuelCostKm + tolls + 0.05; 
+
+      // Чиста собівартість з урахуванням порожнього пробігу
+      const rawCostKm = varCostKm + fixedPerKm;
+      const netCostKm = rawCostKm * (1 + emptyPct);
+
+      // Мінімальна ставка з маржею
+      const rateKm = margin < 1 ? netCostKm / (1 - margin) : netCostKm;
+      const totalTrip = rateKm * distance;
+
+      document.getElementById('varPerKm').innerText = varCostKm.toFixed(3) + ' €';
+      document.getElementById('costPerKm').innerText = netCostKm.toFixed(3) + ' €';
+      document.getElementById('ratePerKm').innerText = rateKm.toFixed(2) + ' €';
+      document.getElementById('totalTripCost').innerText = totalTrip.toFixed(2) + ' €';
+
+      return { distance, rateKm, totalTrip, netCostKm };
+    }
+
+    function sendResultToChat() {
+      const res = calculate();
+      const data = {
+        distance: res.distance,
+        ratePerKm: res.rateKm.toFixed(2),
+        totalPrice: res.totalTrip.toFixed(2),
+        costPerKm: res.netCostKm.toFixed(2)
+      };
+      // Відправка даних назад у Telegram-бот
+      tg.sendData(JSON.stringify(data));
+    }
+
+    // Первинний розрахунок при завантаженні
+    calculate();
+  </script>
+</body>
+</html>
