@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 BOT_TOKEN = "9078489050:AAFY85VRntNZ01JLcpZWt04r7J1sri7j42M"
-WEBAPP_URL = "https://ваш-домен.com/index.html" # URL де розміщено HTML-код
+WEBAPP_URL = "https://vkryshtofor.github.io/WSWLogiCost_app/" # URL де розміщено HTML-код
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
