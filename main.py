@@ -13,7 +13,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 # Приклад вашого посилання на GitHub Pages
-WEBAPP_URL = "https://ваш-логін.github.io/назва-репозиторію/"
+WEBAPP_URL = "https://https://vkryshtofor.github.io/WSWLogiCost_app//"
 
 @dp.message(F.text == "/start")
 async def cmd_start(message: Message):
