@@ -2,22 +2,20 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Калькулятор Перевезень</title>
-  <!-- Підключення SDK Telegram Mini App -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Калькулятор Вантажоперевезень</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-color: var(--tg-theme-bg-color, #ffffff);
-      --text-color: var(--tg-theme-text-color, #222222);
-      --hint-color: var(--tg-theme-hint-color, #999999);
-      --btn-color: var(--tg-theme-button-color, #2481cc);
-      --btn-text-color: var(--tg-theme-button-text-color, #ffffff);
-      --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --accent-color: #2563eb;
+      --border-color: #cbd5e1;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
@@ -25,35 +23,80 @@
       box-sizing: border-box;
     }
 
-    h2 { margin-top: 0; text-align: center; }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: var(--accent-color);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
 
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     label {
       display: block;
       font-size: 13px;
-      color: var(--hint-color);
-      margin-bottom: 4px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #64748b;
     }
 
     input, select {
       width: 100%;
-      padding: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      border: 1px solid #ccc;
-      background: var(--secondary-bg);
-      color: var(--text-color);
-      box-sizing: border-box;
       font-size: 15px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    .result-card {
-      background: var(--secondary-bg);
-      border-radius: 10px;
-      padding: 14px;
-      margin-top: 16px;
+    input:focus, select:focus {
+      border-color: var(--accent-color);
+    }
+
+    .currency-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .currency-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .currency-btn.active {
+      background: var(--accent-color);
+      color: #fff;
+      border-color: var(--accent-color);
+    }
+
+    .results {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
     }
 
     .result-row {
@@ -64,134 +107,171 @@
     }
 
     .result-row.total {
+      font-size: 17px;
       font-weight: bold;
-      font-size: 16px;
-      border-top: 1px solid #ddd;
+      color: #0369a1;
+      border-top: 1px dashed #93c5fd;
       padding-top: 8px;
-      color: var(--btn-color);
+      margin-top: 8px;
     }
 
-    button.send-btn {
+    .btn-submit {
       width: 100%;
-      padding: 12px;
-      background-color: var(--btn-color);
-      color: var(--btn-text-color);
+      background: var(--accent-color);
+      color: white;
       border: none;
+      padding: 12px;
       border-radius: 8px;
       font-size: 16px;
       font-weight: bold;
-      margin-top: 16px;
       cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-submit:active {
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
 
-  <h2>🚛 Калькулятор Собівартості</h2>
+<div class="container">
+  <h2>🧮 Калькулятор Рейсу</h2>
 
-  <div class="form-group">
-    <label for="distance">Пробіг рейсу (км):</label>
-    <input type="number" id="distance" value="1500" oninput="calculate()">
+  <!-- Вибір валюти -->
+  <label>Валюта розрахунку:</label>
+  <div class="currency-toggle">
+    <div class="currency-btn active" id="btn-UAH" onclick="setCurrency('UAH', '₴')">UAH (₴)</div>
+    <div class="currency-btn" id="btn-USD" onclick="setCurrency('USD', '$')">USD ($)</div>
   </div>
 
-  <div class="form-group">
-    <label for="emptyPct">Порожній пробіг (%):</label>
-    <input type="number" id="emptyPct" value="10" oninput="calculate()">
+  <div class="card">
+    <div class="form-group">
+      <label for="distance">Відстань (км):</label>
+      <input type="number" id="distance" placeholder="наприклад, 850" oninput="calculate()">
+    </div>
+
+    <div class="form-group">
+      <label for="consumption">Розхід пального (л/100 км):</label>
+      <input type="number" id="consumption" value="32" oninput="calculate()">
+    </div>
+
+    <div class="form-group">
+      <label for="fuelPrice">Ціна пального (<span class="curr-symb">₴</span>/л):</label>
+      <input type="number" id="fuelPrice" placeholder="наприклад, 55" oninput="calculate()">
+    </div>
+
+    <div class="form-group">
+      <label for="tolls">Дорожні збори / Дороги (<span class="curr-symb">₴</span>):</label>
+      <input type="number" id="tolls" value="0" oninput="calculate()">
+    </div>
+
+    <div class="form-group">
+      <label for="otherCosts">Інші витрати (добові, паркінг) (<span class="curr-symb">₴</span>):</label>
+      <input type="number" id="otherCosts" value="0" oninput="calculate()">
+    </div>
+
+    <div class="form-group">
+      <label for="margin">Маржа / Прибуток (%):</label>
+      <input type="number" id="margin" value="15" oninput="calculate()">
+    </div>
   </div>
 
-  <div class="form-group">
-    <label for="fuelPrice">Ціна дизеля (€/л):</label>
-    <input type="number" step="0.01" id="fuelPrice" value="1.40" oninput="calculate()">
-  </div>
-
-  <div class="form-group">
-    <label for="consumption">Витрата пального (л/100 км):</label>
-    <input type="number" id="consumption" value="31" oninput="calculate()">
-  </div>
-
-  <div class="form-group">
-    <label for="tolls">Платні дороги (€/км):</label>
-    <input type="number" step="0.01" id="tolls" value="0.19" oninput="calculate()">
-  </div>
-
-  <div class="form-group">
-    <label for="fixedPerKm">Постійні витрати + зарплата (€/км):</label>
-    <input type="number" step="0.01" id="fixedPerKm" value="0.48" oninput="calculate()">
-  </div>
-
-  <div class="form-group">
-    <label for="margin">Маржа (%):</label>
-    <input type="number" id="margin" value="15" oninput="calculate()">
-  </div>
-
-  <div class="result-card">
+  <div class="card results">
     <div class="result-row">
-      <span>Змінні витрати/км:</span>
-      <span id="varPerKm">0.00 €</span>
+      <span>Витрати на пальне:</span>
+      <span id="resFuel">0 <span class="curr-symb">₴</span></span>
     </div>
     <div class="result-row">
-      <span>Собівартість 1 км (з пустим):</span>
-      <span id="costPerKm">0.00 €</span>
+      <span>Собівартість рейсу:</span>
+      <span id="resCost">0 <span class="curr-symb">₴</span></span>
+    </div>
+    <div class="result-row">
+      <span>Собівартість 1 км:</span>
+      <span id="resCostPerKm">0 <span class="curr-symb">₴</span></span>
     </div>
     <div class="result-row total">
-      <span>Мінімальна ставка / км:</span>
-      <span id="ratePerKm">0.00 €</span>
+      <span>Рекомендована ціна:</span>
+      <span id="resPrice">0 <span class="curr-symb">₴</span></span>
     </div>
-    <div class="result-row total">
-      <span>Загальна вартість рейсу:</span>
-      <span id="totalTripCost">0.00 €</span>
+    <div class="result-row">
+      <span>Тариф на 1 км:</span>
+      <span id="resRatePerKm">0 <span class="curr-symb">₴</span></span>
     </div>
   </div>
 
-  <button class="send-btn" onclick="sendResultToChat()">Надіслати результат у чат</button>
+  <button class="btn-submit" onclick="sendToTelegram()">Надіслати результат у чат</button>
+</div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Розгортаємо Mini App на весь екран
+<script>
+  let tg = window.Telegram ? window.Telegram.WebApp : null;
+  if (tg) tg.expand();
 
-    function calculate() {
-      const distance = parseFloat(document.getElementById('distance').value) || 0;
-      const emptyPct = (parseFloat(document.getElementById('emptyPct').value) || 0) / 100;
-      const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
-      const consumption = parseFloat(document.getElementById('consumption').value) || 0;
-      const tolls = parseFloat(document.getElementById('tolls').value) || 0;
-      const fixedPerKm = parseFloat(document.getElementById('fixedPerKm').value) || 0;
-      const margin = (parseFloat(document.getElementById('margin').value) || 0) / 100;
+  let currentSymbol = '₴';
+  let currentCurrency = 'UAH';
 
-      // Змінні витрати: Паливо + AdBlue (приблизно 2% від пального) + дороги + ТО (0.05€)
-      const fuelCostKm = (consumption / 100) * fuelPrice;
-      const varCostKm = fuelCostKm + tolls + 0.05; 
+  function setCurrency(code, symbol) {
+    currentCurrency = code;
+    currentSymbol = symbol;
+    
+    document.getElementById('btn-UAH').classList.toggle('active', code === 'UAH');
+    document.getElementById('btn-USD').classList.toggle('active', code === 'USD');
 
-      // Чиста собівартість з урахуванням порожнього пробігу
-      const rawCostKm = varCostKm + fixedPerKm;
-      const netCostKm = rawCostKm * (1 + emptyPct);
-
-      // Мінімальна ставка з маржею
-      const rateKm = margin < 1 ? netCostKm / (1 - margin) : netCostKm;
-      const totalTrip = rateKm * distance;
-
-      document.getElementById('varPerKm').innerText = varCostKm.toFixed(3) + ' €';
-      document.getElementById('costPerKm').innerText = netCostKm.toFixed(3) + ' €';
-      document.getElementById('ratePerKm').innerText = rateKm.toFixed(2) + ' €';
-      document.getElementById('totalTripCost').innerText = totalTrip.toFixed(2) + ' €';
-
-      return { distance, rateKm, totalTrip, netCostKm };
-    }
-
-    function sendResultToChat() {
-      const res = calculate();
-      const data = {
-        distance: res.distance,
-        ratePerKm: res.rateKm.toFixed(2),
-        totalPrice: res.totalTrip.toFixed(2),
-        costPerKm: res.netCostKm.toFixed(2)
-      };
-      // Відправка даних назад у Telegram-бот
-      tg.sendData(JSON.stringify(data));
-    }
-
-    // Первинний розрахунок при завантаженні
+    document.querySelectorAll('.curr-symb').forEach(el => el.innerText = symbol);
     calculate();
-  </script>
+  }
+
+  function calculate() {
+    const distance = parseFloat(document.getElementById('distance').value) || 0;
+    const consumption = parseFloat(document.getElementById('consumption').value) || 0;
+    const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
+    const tolls = parseFloat(document.getElementById('tolls').value) || 0;
+    const otherCosts = parseFloat(document.getElementById('otherCosts').value) || 0;
+    const margin = parseFloat(document.getElementById('margin').value) || 0;
+
+    // Розрахунок пального
+    const fuelCost = (distance / 100) * consumption * fuelPrice;
+    
+    // Загальна собівартість
+    const totalCost = fuelCost + tolls + otherCosts;
+    
+    // Собівартість за 1 км
+    const costPerKm = distance > 0 ? totalCost / distance : 0;
+
+    // Фінальна ціна з урахуванням маржі
+    const totalPrice = totalCost * (1 + margin / 100);
+    
+    // Тариф за 1 км
+    const ratePerKm = distance > 0 ? totalPrice / distance : 0;
+
+    // Вивід результатів
+    document.getElementById('resFuel').innerText = fuelCost.toFixed(2) + ' ' + currentSymbol;
+    document.getElementById('resCost').innerText = totalCost.toFixed(2) + ' ' + currentSymbol;
+    document.getElementById('resCostPerKm').innerText = costPerKm.toFixed(2) + ' ' + currentSymbol;
+    document.getElementById('resPrice').innerText = totalPrice.toFixed(2) + ' ' + currentSymbol;
+    document.getElementById('resRatePerKm').innerText = ratePerKm.toFixed(2) + ' ' + currentSymbol;
+  }
+
+  function sendToTelegram() {
+    if (!tg) {
+      alert("Відкрито поза Telegram Mini App");
+      return;
+    }
+
+    const distance = document.getElementById('distance').value || '0';
+    const totalPrice = document.getElementById('resPrice').innerText;
+    const ratePerKm = document.getElementById('resRatePerKm').innerText;
+
+    const data = {
+      currency: currentCurrency,
+      distance: distance,
+      totalPrice: totalPrice,
+      ratePerKm: ratePerKm
+    };
+
+    tg.sendData(JSON.stringify(data));
+  }
+</script>
+
 </body>
 </html>
