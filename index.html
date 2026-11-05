@@ -1,83 +1,11 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Калькулятор Перевезень</title>
   <!-- Підключення SDK Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  function exportToPDF() {
-  // Вибираємо блок з результатами розрахунку
-  const element = document.querySelector('.result-card');
-  function exportToCSV() {
-  // Збираємо дані з полів калькулятора
-  const distance = document.getElementById('distance').value;
-  const emptyPct = document.getElementById('emptyPct').value;
-  const fuelPrice = document.getElementById('fuelPrice').value;
-  const consumption = document.getElementById('consumption').value;
-  const tolls = document.getElementById('tolls').value;
-  const fixedPerKm = document.getElementById('fixedPerKm').value;
-  const margin = document.getElementById('margin').value;
-  
-  // Збираємо результати
-  const varPerKm = document.getElementById('varPerKm').innerText;
-  const costPerKm = document.getElementById('costPerKm').innerText;
-  const ratePerKm = document.getElementById('ratePerKm').innerText;
-  const totalTripCost = document.getElementById('totalTripCost').innerText;
-
-  // Формуємо вміст CSV файлу (з підтримкою кирилиці через UTF-8 BOM)
-  let csvContent = "\uFEFF"; // BOM для коректного відображення української мови в Excel
-  csvContent += "Параметр;Значення\n";
-  csvContent += "Пробіг рейсу (км);" + distance + "\n";
-  csvContent += "Порожній пробіг (%);" + emptyPct + "%\n";
-  csvContent += "Ціна дизеля (€/л);" + fuelPrice + "\n";
-  csvContent += "Витрата пального (л/100км);" + consumption + "\n";
-  csvContent += "Платні дороги (€/км);" + tolls + "\n";
-  csvContent += "Постійні витрати (€/км);" + fixedPerKm + "\n";
-  csvContent += "Маржа (%);" + margin + "%\n";
-  csvContent += "Змінні витрати/км;" + varPerKm + "\n";
-  csvContent += "Собівартість 1 км;" + costPerKm + "\n";
-  csvContent += "Мінімальна ставка/км;" + ratePerKm + "\n";
-  csvContent += "Загальна вартість рейсу;" + totalTripCost + "\n";
-
-  // Створюємо віртуальне посилання для завантаження файлу
-  const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "calculation_report.csv");
-  document.body.appendChild(link);
-  
-  // Автоматично клікаємо по посиланню для завантаження
-  link.click();
-  document.body.removeChild(link);
-}
-  
-  const options = {
-    margin:       10,
-    filename:     'reis_calculation.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // Запуск генерації та збереження PDF
-  html2pdf().from(element).set(options).save();
-}
-  // Вибираємо блок з результатами розрахунку
-  const element = document.querySelector('.result-card');
-  
-  const options = {
-    margin:       10,
-    filename:     'reis_calculation.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // Запуск генерації та збереження PDF
-  html2pdf().from(element).set(options).save();
-}
   <style>
     :root {
       --bg-color: var(--tg-theme-bg-color, #ffffff);
@@ -143,8 +71,6 @@
       color: var(--btn-color);
     }
 
-    <button class="send-btn" style="background-color: #27ae60; margin-top: 8px;" onclick="exportToCSV()">📊 Експортувати в таблицю (CSV)</button>
-    <button class="send-btn" style="background-color: #e74c3c; margin-top: 8px;" onclick="exportToPDF()">📥 Завантажити звіт у PDF</button>
     button.send-btn {
       width: 100%;
       padding: 12px;
